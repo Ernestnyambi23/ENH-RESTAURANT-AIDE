@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSystemAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'ernestnyambi23@gmail.com' && request.auth.token.email_verified == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connection verification endpoint
+    match /test/connection {
+      allow read: if true;
+      allow write: if isSystemAdmin();
+    }
+
+    // Admin accounts
+    match /admins/{adminUid} {
+      allow read: if isSignedIn();
+      allow write: if isSystemAdmin();
+    }
+
+    // Multi-tenant Restaurants
+    match /restaurants/{restaurantId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(restaurantId) && request.resource.data.name is string;
+      allow delete: if isValidId(restaurantId) && isSystemAdmin();
+    }
+
+    // Restaurant Settings
+    match /settings/{settingId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(settingId) && request.resource.data.restaurantName is string;
+      allow delete: if isValidId(settingId) && isSystemAdmin();
+    }
+
+    // Menu Items
+    match /items/{itemId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(itemId) && request.resource.data.name is string && request.resource.data.stock is number;
+      allow delete: if isValidId(itemId);
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow get, list: if true;
+      allow create: if isValidId(orderId) && request.resource.data.customerName is string && request.resource.data.total is number;
+      allow update: if isValidId(orderId);
+      allow delete: if isValidId(orderId);
+    }
+
+    // Staff Records
+    match /staff/{staffId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(staffId) && request.resource.data.name is string;
+      allow delete: if isValidId(staffId);
+    }
+
+    // Hardware Terminals & Devices
+    match /devices/{deviceId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(deviceId) && request.resource.data.name is string;
+      allow delete: if isValidId(deviceId);
+    }
+
+    // Purchases & Procurement
+    match /purchases/{purchaseId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(purchaseId) && request.resource.data.itemName is string;
+      allow delete: if isValidId(purchaseId);
+    }
+
+    // Capital & Working Finances
+    match /capital/{capitalId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(capitalId) && request.resource.data.amount is number;
+      allow delete: if isValidId(capitalId) && isSystemAdmin();
+    }
+
+    // Business Owners
+    match /business_owners/{ownerId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(ownerId) && request.resource.data.name is string;
+      allow delete: if isValidId(ownerId) && isSystemAdmin();
+    }
+
+    // One-Time Passcodes
+    match /otps/{otpId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(otpId) && request.resource.data.code is string;
+      allow delete: if isValidId(otpId);
+    }
+
+    // M-Pesa Transactions
+    match /mpesa_transactions/{txId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(txId) && request.resource.data.amount is number;
+      allow delete: if isValidId(txId);
+    }
+  }
+}

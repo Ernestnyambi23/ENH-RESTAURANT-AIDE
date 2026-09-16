@@ -1,0 +1,54 @@
+{
+  "name": "ENH RESTAURANT MANAGEMENT AIDE LTD",
+  "short_name": "ENH Aide",
+  "description": "Smart POS, Kitchen Queue & Take Aways System by ENH RESTAURANT MANAGEMENT AIDE LTD.",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f5f0",
+  "theme_color": "#1f4d3e",
+  "categories": ["business", "food", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Order",
+      "short_name": "Order",
+      "description": "Open Fast Order POS",
+      "url": "/?tab=order",
+      "icons": [{ "src": "/icon-192.jpg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kitchen Orders",
+      "short_name": "Kitchen",
+      "description": "Live Received Orders Queue",
+      "url": "/?tab=order_received",
+      "icons": [{ "src": "/icon-192.jpg", "sizes": "192x192" }]
+    }
+  ]
+}

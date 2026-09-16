@@ -1,0 +1,265 @@
+{
+  "entities": {
+    "RestaurantSettings": {
+      "title": "RestaurantSettings",
+      "description": "Global restaurant configurations, appearance, and contact details",
+      "type": "object",
+      "properties": {
+        "restaurantName": { "type": "string", "maxLength": 100 },
+        "tagline": { "type": "string", "maxLength": 150 },
+        "currency": { "type": "string", "maxLength": 10 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "taxRate": { "type": "number" },
+        "defaultDeliveryFee": { "type": "number" },
+        "defaultPrepMinutes": { "type": "number" },
+        "overdueThresholdMinutes": { "type": "number" },
+        "enableSoundAlerts": { "type": "boolean" },
+        "adminPassword": { "type": "string", "maxLength": 100 },
+        "ownerName": { "type": "string", "maxLength": 100 },
+        "ownerEmail": { "type": "string", "maxLength": 100 },
+        "ownershipLicense": { "type": "string", "maxLength": 100 },
+        "language": { "type": "string", "maxLength": 10 },
+        "theme": { "type": "string", "maxLength": 10 },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["restaurantName", "currency", "ownerEmail"]
+    },
+    "MenuItem": {
+      "title": "MenuItem",
+      "description": "Restaurant menu item with pricing, categories, and stock",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 50 },
+        "stock": { "type": "number" },
+        "icon": { "type": "string", "maxLength": 50 },
+        "price": { "type": "number" },
+        "description": { "type": "string", "maxLength": 500 },
+        "isPopular": { "type": "boolean" },
+        "isChefSpecial": { "type": "boolean" },
+        "isSaturdaySpecial": { "type": "boolean" },
+        "imageUrl": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "name", "category", "stock"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer dining, takeaway, or delivery order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "orderNumber": { "type": "string", "maxLength": 50 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "orderType": { "type": "string", "maxLength": 20 },
+        "tableNumber": { "type": "string", "maxLength": 20 },
+        "subtotal": { "type": "number" },
+        "tax": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "total": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "debtAmount": { "type": "number" },
+        "isPaid": { "type": "boolean" },
+        "isCompleted": { "type": "boolean" },
+        "paymentMethod": { "type": "string", "maxLength": 20 },
+        "paymentStatus": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "maxLength": 20 },
+        "source": { "type": "string", "maxLength": 30 },
+        "estimatedPrepMinutes": { "type": "number" },
+        "isDeleted": { "type": "boolean" },
+        "deletedAt": { "type": "number" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "orderNumber", "customerName", "orderType", "total", "status", "createdAt"]
+    },
+    "StaffMember": {
+      "title": "StaffMember",
+      "description": "Employed staff profile and emergency contacts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50 },
+        "password": { "type": "string", "maxLength": 100 },
+        "pin": { "type": "string", "maxLength": 10 },
+        "roleTitle": { "type": "string", "maxLength": 50 },
+        "age": { "type": "number" },
+        "sex": { "type": "string", "maxLength": 10 },
+        "fromLocation": { "type": "string", "maxLength": 100 },
+        "emergencyPhone1": { "type": "string", "maxLength": 30 },
+        "emergencyPhone2": { "type": "string", "maxLength": 30 },
+        "guardianName": { "type": "string", "maxLength": 100 },
+        "agreedSalary": { "type": "number" },
+        "employmentDate": { "type": "string", "maxLength": 20 },
+        "salaryPaymentStatus": { "type": "string", "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "name", "roleTitle", "agreedSalary", "emergencyPhone1"]
+    },
+    "ConnectedDevice": {
+      "title": "ConnectedDevice",
+      "description": "Hardware terminal or mobile station linked to POS",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "deviceType": { "type": "string", "maxLength": 30 },
+        "assignedLocation": { "type": "string", "maxLength": 100 },
+        "ipAddress": { "type": "string", "maxLength": 50 },
+        "browserInfo": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "maxLength": 30 },
+        "lastActive": { "type": "number" },
+        "registeredAt": { "type": "number" }
+      },
+      "required": ["id", "name", "deviceType", "status"]
+    },
+    "Purchase": {
+      "title": "Purchase",
+      "description": "Procured restaurant inventory raw materials or supplies",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "itemName": { "type": "string", "maxLength": 100 },
+        "quantity": { "type": "number" },
+        "pricePerUnit": { "type": "number" },
+        "totalCost": { "type": "number" },
+        "purchaseDate": { "type": "string", "maxLength": 20 },
+        "notes": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "itemName", "quantity", "pricePerUnit", "totalCost"]
+    },
+    "Capital": {
+      "title": "Capital",
+      "description": "Initial or working business capital",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 300 },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "amount"]
+    },
+    "BusinessOwnerAccount": {
+      "title": "BusinessOwnerAccount",
+      "description": "Registered business owner account credentials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50 },
+        "password": { "type": "string", "maxLength": 100 },
+        "pin": { "type": "string", "maxLength": 10 },
+        "email": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "businessName": { "type": "string", "maxLength": 100 },
+        "ownerType": { "type": "string", "maxLength": 30 },
+        "accessEnabled": { "type": "boolean" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "name", "username", "password", "accessEnabled"]
+    },
+    "OneTimePasscode": {
+      "title": "OneTimePasscode",
+      "description": "Pairing OTP for hardware terminal authorization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "code": { "type": "string", "maxLength": 10 },
+        "createdAt": { "type": "number" },
+        "expiresAt": { "type": "number" },
+        "isUsed": { "type": "boolean" },
+        "note": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["id", "code", "createdAt", "expiresAt", "isUsed"]
+    },
+    "MpesaTransaction": {
+      "title": "MpesaTransaction",
+      "description": "M-Pesa payment records and STK push ledger",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "amount": { "type": "number" },
+        "reference": { "type": "string", "maxLength": 50 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "orderNumber": { "type": "string", "maxLength": 50 },
+        "transactionDate": { "type": "number" }
+      },
+      "required": ["id", "amount", "reference", "transactionDate"]
+    },
+    "TenantRestaurant": {
+      "title": "TenantRestaurant",
+      "description": "Multi-tenant restaurant account with branding and feature flags",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "slug": { "type": "string", "maxLength": 50 },
+        "tagline": { "type": "string", "maxLength": 150 },
+        "currency": { "type": "string", "maxLength": 10 },
+        "logoUrl": { "type": "string", "maxLength": 500 },
+        "themeColor": { "type": "string", "maxLength": 30 },
+        "status": { "type": "string", "maxLength": 20 },
+        "ownerEmail": { "type": "string", "maxLength": 100 },
+        "ownerName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "name", "slug", "currency", "ownerEmail", "status"]
+    }
+  },
+  "firestore": {
+    "/restaurants/{restaurantId}": {
+      "schema": "TenantRestaurant",
+      "description": "Registered multi-tenant restaurants and branch locations"
+    },
+    "/settings/{settingId}": {
+      "schema": "RestaurantSettings",
+      "description": "System-wide restaurant configuration and settings"
+    },
+    "/items/{itemId}": {
+      "schema": "MenuItem",
+      "description": "Dish and beverage items available in the menu"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Restaurant order records"
+    },
+    "/staff/{staffId}": {
+      "schema": "StaffMember",
+      "description": "Staff roster, emergency contacts, and payroll agreements"
+    },
+    "/devices/{deviceId}": {
+      "schema": "ConnectedDevice",
+      "description": "Terminals, tablets, and mobile POS clients"
+    },
+    "/purchases/{purchaseId}": {
+      "schema": "Purchase",
+      "description": "Procurement and supplies logs"
+    },
+    "/capital/{capitalId}": {
+      "schema": "Capital",
+      "description": "Business capital investment records"
+    },
+    "/business_owners/{ownerId}": {
+      "schema": "BusinessOwnerAccount",
+      "description": "Business owner logins and authorization"
+    },
+    "/otps/{otpId}": {
+      "schema": "OneTimePasscode",
+      "description": "One-time passcodes for hardware terminal pairing"
+    },
+    "/mpesa_transactions/{txId}": {
+      "schema": "MpesaTransaction",
+      "description": "Payment confirmation transactions"
+    }
+  }
+}

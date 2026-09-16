@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    --ink: #0f172a;
+    --ink-soft: #334155;
+    --ink-faint: #64748b;
+    --bg: #ffffff;
+    --card: #ffffff;
+    --line: #e2e8f0;
+    
+    /* Dynamic Theme Variables */
+    --primary-color: #1f4d3e;
+    --primary-dark: #143529;
+    --primary-tint: #e3ede8;
+    --primary-text-color: #ffffff;
+
+    --accent-color: #e67e22;
+    --accent-dark: #b85d10;
+    --accent-tint: #fbeee3;
+    --accent-text-color: #ffffff;
+
+    --pine: var(--primary-color, #1f4d3e);
+    --pine-dark: var(--primary-dark, #143529);
+    --pine-tint: var(--primary-tint, #e3ede8);
+    --amber: var(--accent-color, #e67e22);
+    --amber-tint: var(--accent-tint, #fbeee3);
+    --red: #b3402f;
+    --red-tint: #f6e2de;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg);
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Theme-specific styles & High Visibility White Theme Overrides */
+.theme-white,
+[data-theme="white"] {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --ink-soft: #334155;
+  --ink-faint: #64748b;
+  --line: #e2e8f0;
+}
+
+.theme-white .bg-\[\#f4f5f0\],
+[data-theme="white"] .bg-\[\#f4f5f0\] {
+  background-color: #f8fafc !important;
+}
+
+.theme-white .border-\[\#e2e4dc\],
+[data-theme="white"] .border-\[\#e2e4dc\] {
+  border-color: #e2e8f0 !important;
+}
+
+.theme-white .text-\[\#1b2620\],
+[data-theme="white"] .text-\[\#1b2620\] {
+  color: #0f172a !important;
+}
+
+.theme-white .text-\[\#4c5a52\],
+[data-theme="white"] .text-\[\#4c5a52\] {
+  color: #334155 !important;
+}
+
+.theme-white .text-\[\#8b978f\],
+[data-theme="white"] .text-\[\#8b978f\] {
+  color: #475569 !important;
+}
+
+/* Warm Light Theme */
+.theme-light,
+[data-theme="light"] {
+  --bg: #f4f5f0;
+  --card: #ffffff;
+  --ink: #1b2620;
+  --ink-soft: #4c5a52;
+  --ink-faint: #8b978f;
+  --line: #e2e4dc;
+}
+
+/* Dark Theme */
+.theme-dark,
+[data-theme="dark"] {
+  --bg: #101713;
+  --card: #18221c;
+  --ink: #f1f5f9;
+  --ink-soft: #cbd5e1;
+  --ink-faint: #94a3b8;
+  --line: #24342a;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt, #printable-receipt * {
+    visibility: visible;
+  }
+  #printable-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+/* Anti-Blur & Crisp Appearance Optimizations */
+.reduce-blur,
+.reduce-blur * {
+  text-rendering: optimizeLegibility;
+}
+
+.reduce-blur [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.reduce-blur [class*="blur-3xl"],
+.reduce-blur [class*="blur-2xl"],
+.reduce-blur [class*="blur-xl"] {
+  filter: none !important;
+  opacity: 0.1 !important;
+}
+
+/* Crisp rendering utility for logos and background images */
+.crisp-img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+

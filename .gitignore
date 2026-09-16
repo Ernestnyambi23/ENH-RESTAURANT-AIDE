@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+Node_modules/
+
+# Build & Coverage Outputs
+build/
+dist/
+coverage/
+.gradle/
+**/build/
+
+# System & Log Files
+.DS_Store
+Thumbs.db
+*.log
+
+# Environment & Secrets
+.env*
+!.env.example
