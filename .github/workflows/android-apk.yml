@@ -44,9 +44,20 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Verify Java and Gradle toolchain
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version
+          javac -version
+
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: |
+          echo "Gradle Java configuration:"
+          ./gradlew -version
+          printf '\norg.gradle.java.home=%s\n' "$JAVA_HOME" >> gradle.properties
+          ./gradlew --stop
+          ./gradlew clean assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
