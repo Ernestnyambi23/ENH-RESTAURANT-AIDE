@@ -224,6 +224,10 @@ export interface Order {
   isDeleted?: boolean; // Soft-delete flag for Trash Bin
   deletedAt?: number; // Timestamp (ms) when order was moved to trash
   deletedBy?: string; // Optional user who deleted the order
+  isMerged?: boolean; // True if this bill was consolidated from multiple orders
+  mergedFromOrderNumbers?: string[]; // Source order numbers that were merged
+  mergedFromOrderIds?: string[]; // Source order IDs that were merged
+  mergedAt?: number; // Timestamp ms when merged
 }
 
 export interface Purchase {

@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { verifyUserToken, JwtTokenPayload } from '../server/jwtAuth';
-import { tenantManager } from '../server/tenantManager';
+import type { Request, Response, NextFunction } from 'express';
+import { verifyUserToken, type JwtTokenPayload } from '../server/jwtAuth.ts';
+import { tenantManager } from '../server/tenantManager.ts';
 
 export interface ScopedRequest extends Request {
   jwtUser?: JwtTokenPayload;

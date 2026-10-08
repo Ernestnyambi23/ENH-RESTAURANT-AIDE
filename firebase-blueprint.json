@@ -72,6 +72,8 @@
         "estimatedPrepMinutes": { "type": "number" },
         "isDeleted": { "type": "boolean" },
         "deletedAt": { "type": "number" },
+        "isMerged": { "type": "boolean" },
+        "mergedAt": { "type": "number" },
         "createdAt": { "type": "number" },
         "updatedAt": { "type": "number" }
       },

@@ -3,18 +3,33 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import dotenv from 'dotenv';
-import { paymentGatewayService, PushRequest } from './src/server/paymentGateway';
-import { AI_ORDER_ASSISTANT_SYSTEM_INSTRUCTION } from './src/data/menuDatabase';
-import { generateFallbackAiOrderResponse } from './src/server/aiAssistant';
-import { signUserToken, verifyUserToken } from './src/server/jwtAuth';
-import { tenantManager } from './src/server/tenantManager';
-import { authenticateJwt, requireTenantScope, requireSuperAdmin, ScopedRequest } from './src/middleware/tenantScope';
-import { processAiChatMessage, ChatServiceRequest } from './src/server/geminiChatService';
+import { paymentGatewayService, type PushRequest } from './src/server/paymentGateway.ts';
+import { AI_ORDER_ASSISTANT_SYSTEM_INSTRUCTION } from './src/data/menuDatabase.ts';
+import { generateFallbackAiOrderResponse } from './src/server/aiAssistant.ts';
+import { signUserToken, verifyUserToken } from './src/server/jwtAuth.ts';
+import { tenantManager } from './src/server/tenantManager.ts';
+import { authenticateJwt, requireTenantScope, requireSuperAdmin, type ScopedRequest } from './src/middleware/tenantScope.ts';
+import { processAiChatMessage, type ChatServiceRequest } from './src/server/geminiChatService.ts';
+import { requireAuth, type AuthRequest } from './src/middleware/auth.ts';
+import { getOrCreateUser, getUsers } from './src/db/users.ts';
+import {
+  getDbMenuItems,
+  upsertDbMenuItem,
+  getDbOrders,
+  upsertDbOrder,
+  deleteDbOrder,
+  getDbStaff,
+  upsertDbStaff,
+  getDbPurchases,
+  insertDbPurchase,
+  getDbSettings,
+  upsertDbSettings,
+} from './src/db/queries.ts';
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json());
 app.use(authenticateJwt);
@@ -104,21 +119,6 @@ app.get('/api/health', (req, res) => {
 // =========================================================================
 // CLOUD SQL & AUTHENTICATION ENDPOINTS
 // =========================================================================
-import { requireAuth, AuthRequest } from './src/middleware/auth.ts';
-import { getOrCreateUser, getUsers } from './src/db/users.ts';
-import {
-  getDbMenuItems,
-  upsertDbMenuItem,
-  getDbOrders,
-  upsertDbOrder,
-  deleteDbOrder,
-  getDbStaff,
-  upsertDbStaff,
-  getDbPurchases,
-  insertDbPurchase,
-  getDbSettings,
-  upsertDbSettings,
-} from './src/db/queries.ts';
 
 // Synchronize or register current authenticated user in Cloud SQL
 app.post('/api/users/sync', requireAuth, async (req: AuthRequest, res) => {

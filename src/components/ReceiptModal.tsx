@@ -107,6 +107,14 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 <span className="text-gray-600">Receipt No:</span>
                 <span className="font-bold font-mono">{order.orderNumber}</span>
               </div>
+              {order.isMerged && (
+                <div className="flex justify-between items-center py-0.5">
+                  <span className="text-purple-700 font-bold">Consolidated Bill:</span>
+                  <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                    Merged from: {order.mergedFromOrderNumbers?.join(', ') || 'Tickets'}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-gray-600">Date:</span>
                 <span>{new Date(order.createdAt).toLocaleDateString('en-GB')}</span>

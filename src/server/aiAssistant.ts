@@ -1,4 +1,4 @@
-import { MENU_DATABASE } from '../data/menuDatabase';
+import { MENU_DATABASE } from '../data/menuDatabase.ts';
 
 export interface AssistantResponse {
   reply: string;

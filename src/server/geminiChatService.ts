@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
-import { AI_ORDER_ASSISTANT_SYSTEM_INSTRUCTION } from '../data/menuDatabase';
-import { generateFallbackAiOrderResponse } from './aiAssistant';
+import { AI_ORDER_ASSISTANT_SYSTEM_INSTRUCTION } from '../data/menuDatabase.ts';
+import { generateFallbackAiOrderResponse } from './aiAssistant.ts';
 
 export type AssistantRole = 'general' | 'maps' | 'search' | 'complex' | 'fast';
 

@@ -113,6 +113,7 @@ export function generateReceiptText(
     `Date: ${dateStr}`,
     `Time: ${timeStr}`,
     `Cashier: ${cashierName}`,
+    ...(order.isMerged ? [`Type: Consolidated Bill (Merged from: ${order.mergedFromOrderNumbers?.join(', ') || 'Tickets'})`] : []),
     ...(order.customerName ? [`Customer: ${order.customerName}`] : []),
     ...(order.phone ? [`Phone: ${order.phone}`] : []),
     ...(order.tableNumber ? [`Table/Seat: ${order.tableNumber}`] : []),

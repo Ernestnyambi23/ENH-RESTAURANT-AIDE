@@ -74,7 +74,7 @@ import {
   switchTenantActiveBranch,
 } from './utils/storage';
 import { tenantAuthService } from './services/tenantAuthService';
-import { generateOrderNumber } from './utils/formatters';
+import { generateOrderNumber, formatCurrency } from './utils/formatters';
 import { sound } from './utils/sound';
 import {
   subscribeMenuItems,
@@ -1618,6 +1618,95 @@ export default function App() {
     });
   };
 
+  // Merge multiple orders from the same table or customer into a single bill
+  const handleMergeOrders = (mergedOrder: Order, sourceOrderIds: string[]) => {
+    sound.playSuccess();
+    triggerHaptic('success');
+
+    const otherIds = new Set(sourceOrderIds.filter((id) => id !== mergedOrder.id));
+    const now = Date.now();
+    const deletedBy = authUser?.name || currentRole;
+
+    setOrders((prev) => {
+      let found = false;
+      const updatedList = prev.map((ord) => {
+        if (ord.id === mergedOrder.id) {
+          found = true;
+          return mergedOrder;
+        }
+        if (otherIds.has(ord.id)) {
+          return {
+            ...ord,
+            isDeleted: true,
+            deletedAt: now,
+            deletedBy,
+            notes: (ord.notes ? `${ord.notes} | ` : '') + `[Merged into Order #${mergedOrder.orderNumber}]`,
+          };
+        }
+        return ord;
+      });
+
+      if (!found) {
+        return [mergedOrder, ...updatedList];
+      }
+      return updatedList;
+    });
+
+    // Save consolidated order to Firestore & Cloud SQL
+    saveOrderToFirestore(mergedOrder);
+    fetch('/api/db/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: mergedOrder.id,
+        orderNumber: mergedOrder.orderNumber,
+        customerName: mergedOrder.customerName,
+        phone: mergedOrder.phone || '',
+        orderType: mergedOrder.orderType,
+        tableNumber: mergedOrder.tableNumber || '',
+        subtotal: Math.round(mergedOrder.subtotal),
+        tax: Math.round(mergedOrder.tax),
+        deliveryFee: Math.round(mergedOrder.deliveryFee),
+        total: Math.round(mergedOrder.total),
+        paidAmount: Math.round(mergedOrder.paidAmount),
+        debtAmount: Math.round(mergedOrder.debtAmount),
+        isPaid: mergedOrder.isPaid,
+        isCompleted: mergedOrder.isCompleted,
+        paymentMethod: mergedOrder.paymentMethod,
+        paymentStatus: mergedOrder.paymentStatus,
+        status: mergedOrder.status,
+        source: mergedOrder.source || 'Bar Terminal',
+        estimatedPrepMinutes: mergedOrder.estimatedPrepMinutes || 20,
+      }),
+    }).catch(() => {});
+
+    // Soft-delete the absorbed source orders in Firestore
+    sourceOrderIds
+      .filter((id) => id !== mergedOrder.id)
+      .forEach((id) => {
+        const target = orders.find((o) => o.id === id);
+        if (target) {
+          saveOrderToFirestore({
+            ...target,
+            isDeleted: true,
+            deletedAt: now,
+            deletedBy,
+            notes: (target.notes ? `${target.notes} | ` : '') + `[Merged into Order #${mergedOrder.orderNumber}]`,
+          });
+        }
+      });
+
+    // Display confirmation snackbar with receipt view shortcut
+    setSnackbarState({
+      isOpen: true,
+      title: `Merged into Bill #${mergedOrder.orderNumber}`,
+      subtitle: `Combined ${sourceOrderIds.length} orders for ${mergedOrder.tableNumber ? 'Table ' + mergedOrder.tableNumber : mergedOrder.customerName} (${formatCurrency(mergedOrder.total, settings.currency)})`,
+      variant: 'success',
+      durationMs: 7000,
+      onViewTrash: () => setViewingReceiptOrder(mergedOrder),
+    });
+  };
+
   // Permanently delete individual order record (Hard delete from database)
   const handlePermanentDeleteOrder = (orderId: string) => {
     sound.playTrash();
@@ -2395,6 +2484,7 @@ export default function App() {
                 onBatchDeleteOrders={handleBatchDeleteOrders}
                 trashCount={tenantTrashOrders.length}
                 onOpenTrashBin={() => setIsTrashBinOpen(true)}
+                onMergeOrders={handleMergeOrders}
                 onCreateWalkInOrder={() => {
                   setCurrentTab('order');
                   setIsCartOpen(true);

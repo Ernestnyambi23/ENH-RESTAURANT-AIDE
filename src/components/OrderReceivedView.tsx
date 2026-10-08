@@ -20,9 +20,11 @@ import {
   Square,
   Sparkles,
   Trash2,
+  GitMerge,
 } from 'lucide-react';
 import { Order, OrderStatus, RestaurantSettings } from '../types';
 import { formatCurrency, formatTimeAgo, formatClockTime, isOrderOverdue } from '../utils/formatters';
+import { MergeOrdersModal } from './MergeOrdersModal';
 
 interface OrderReceivedViewProps {
   orders: Order[];
@@ -36,6 +38,7 @@ interface OrderReceivedViewProps {
   onBatchDeleteOrders?: (orderIds: string[]) => void;
   trashCount?: number;
   onOpenTrashBin?: () => void;
+  onMergeOrders?: (mergedOrder: Order, sourceOrderIds: string[]) => void;
 }
 
 export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
@@ -50,6 +53,7 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
   onBatchDeleteOrders,
   trashCount,
   onOpenTrashBin,
+  onMergeOrders,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>('all_received');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -57,6 +61,7 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
   const [localCheckedItems, setLocalCheckedItems] = useState<{ [orderId: string]: number[] }>({});
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isBatchDeleteConfirmOpen, setIsBatchDeleteConfirmOpen] = useState<boolean>(false);
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState<boolean>(false);
 
   // Active / received orders (pending, preparing, ready) - excluding soft-deleted orders
   const activeOrders = useMemo(() => {
@@ -126,6 +131,23 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
   };
 
   // Batch actions
+  const selectedOrdersToMerge = useMemo(() => {
+    return activeOrders.filter((o) => selectedOrderIds.includes(o.id));
+  }, [activeOrders, selectedOrderIds]);
+
+  const mergeNotice = useMemo(() => {
+    if (selectedOrdersToMerge.length < 2) return null;
+    const tables = Array.from(new Set(selectedOrdersToMerge.map((o) => o.tableNumber?.trim()).filter(Boolean)));
+    const customers = Array.from(new Set(selectedOrdersToMerge.map((o) => o.customerName?.trim()).filter(Boolean)));
+    if (tables.length === 1 && tables[0]) {
+      return `Table ${tables[0]}`;
+    }
+    if (customers.length === 1 && customers[0]) {
+      return customers[0];
+    }
+    return null;
+  }, [selectedOrdersToMerge]);
+
   const handleBatchAdvance = (nextStatus: OrderStatus) => {
     if (selectedOrderIds.length === 0) return;
     if (onBatchUpdateStatus) {
@@ -297,11 +319,41 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
 
       {/* Floating Batch Actions Bar when tickets are selected */}
       {selectedOrderIds.length > 0 && (
-        <div className="bg-[#1f4d3e] text-white p-3 rounded-2xl flex items-center justify-between gap-2 shadow-lg animate-in slide-in-from-top-2">
-          <span className="text-xs font-bold">
-            {selectedOrderIds.length} orders selected
-          </span>
-          <div className="flex items-center gap-1.5">
+        <div className="bg-[#1f4d3e] text-white p-3 rounded-2xl flex flex-wrap items-center justify-between gap-2 shadow-lg animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold">
+              {selectedOrderIds.length} {selectedOrderIds.length === 1 ? 'order' : 'orders'} selected
+            </span>
+            {mergeNotice && (
+              <span className="px-2 py-0.5 rounded-full bg-emerald-700/80 text-emerald-100 text-[10px] font-bold border border-emerald-500/30">
+                Matching {mergeNotice}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              id="batch-merge-orders-btn"
+              onClick={() => {
+                if (selectedOrderIds.length >= 2) {
+                  setIsMergeModalOpen(true);
+                }
+              }}
+              disabled={selectedOrderIds.length < 2}
+              className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1 shadow-xs cursor-pointer ${
+                selectedOrderIds.length >= 2
+                  ? 'bg-amber-600 hover:bg-amber-500 text-white ring-1 ring-amber-400/50'
+                  : 'bg-white/15 text-white/50 cursor-not-allowed'
+              }`}
+              title={
+                selectedOrderIds.length < 2
+                  ? 'Select 2 or more orders from the same table or customer to merge'
+                  : 'Merge selected orders into a single consolidated bill'
+              }
+            >
+              <GitMerge className="w-3.5 h-3.5" />
+              <span>Merge Selected</span>
+            </button>
             <button
               type="button"
               onClick={() => handleBatchAdvance('preparing')}
@@ -391,6 +443,15 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
                           {renderTypeIcon(order.orderType)}
                           <span className="capitalize">{order.orderType.replace('_', ' ')}</span>
                         </span>
+                        {order.isMerged && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-extrabold text-purple-800 bg-purple-100 border border-purple-300 px-2 py-0.5 rounded-md shadow-2xs"
+                            title={`Merged Bill combining: ${order.mergedFromOrderNumbers?.join(', ') || ''}`}
+                          >
+                            <GitMerge className="w-3 h-3 text-purple-700" />
+                            <span>Merged Bill</span>
+                          </span>
+                        )}
                         {order.source && (
                           <span className="text-[10px] font-semibold text-[#8b978f] bg-gray-100 px-1.5 py-0.5 rounded">
                             {order.source}
@@ -398,13 +459,44 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
                         )}
                       </div>
 
-                      <div className="text-xs font-bold text-[#1b2620] mt-1">
-                        {order.customerName}
+                      <div className="text-xs font-bold text-[#1b2620] mt-1 flex items-center gap-1.5 flex-wrap">
+                        <span>{order.customerName}</span>
                         {order.tableNumber && (
-                          <span className="text-[#1f4d3e] ml-1.5 font-extrabold">
+                          <span className="text-[#1f4d3e] font-extrabold bg-[#1f4d3e]/10 px-1.5 py-0.5 rounded">
                             • {order.tableNumber}
                           </span>
                         )}
+                        {(() => {
+                          if (!order.tableNumber) return null;
+                          const sameTableOrders = activeOrders.filter(
+                            (o) =>
+                              o.id !== order.id &&
+                              o.tableNumber &&
+                              o.tableNumber.trim().toLowerCase() === order.tableNumber.trim().toLowerCase()
+                          );
+                          if (sameTableOrders.length === 0) return null;
+                          return (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const allTableIds = activeOrders
+                                  .filter(
+                                    (o) =>
+                                      o.tableNumber &&
+                                      o.tableNumber.trim().toLowerCase() === order.tableNumber!.trim().toLowerCase()
+                                  )
+                                  .map((o) => o.id);
+                                setSelectedOrderIds((prev) => Array.from(new Set([...prev, ...allTableIds])));
+                              }}
+                              className="text-[10px] font-extrabold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 px-1.5 py-0.5 rounded transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                              title={`Click to select all ${sameTableOrders.length + 1} orders from ${order.tableNumber} to merge`}
+                            >
+                              <GitMerge className="w-2.5 h-2.5" />
+                              <span>Select Table ({sameTableOrders.length + 1})</span>
+                            </button>
+                          );
+                        })()}
                       </div>
 
                       <div className="flex items-center gap-3 text-[11px] text-[#8b978f] mt-0.5">
@@ -718,6 +810,21 @@ export const OrderReceivedView: React.FC<OrderReceivedViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Merge Orders Modal */}
+      <MergeOrdersModal
+        isOpen={isMergeModalOpen}
+        ordersToMerge={selectedOrdersToMerge}
+        settings={settings}
+        onClose={() => setIsMergeModalOpen(false)}
+        onConfirmMerge={(mergedOrder, sourceOrderIds) => {
+          if (onMergeOrders) {
+            onMergeOrders(mergedOrder, sourceOrderIds);
+          }
+          setIsMergeModalOpen(false);
+          setSelectedOrderIds([]);
+        }}
+      />
     </div>
   );
 };
