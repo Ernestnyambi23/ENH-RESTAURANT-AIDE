@@ -2,10 +2,16 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'Deployed HTTPS backend origin (example: https://api.example.com; leave blank for frontend-only testing)'
+        required: false
+        type: string
   push:
     branches:
       - main
       - 'android/**'
+      - 'fix/**'
 
 permissions:
   contents: read
@@ -33,6 +39,8 @@ jobs:
         run: npm install
 
       - name: Build web application
+        env:
+          VITE_API_BASE_URL: ${{ inputs.api_base_url }}
         run: npm run build
 
       - name: Add Android platform if missing
