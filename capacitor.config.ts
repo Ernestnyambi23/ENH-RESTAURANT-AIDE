@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'com.enh.restaurant.aide',
   appName: "ENH Restaurant Aide",
   webDir: 'dist',
-  bundledWebRuntime: false,
   android: {
     backgroundColor: '#ffffff',
   },

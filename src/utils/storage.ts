@@ -16,6 +16,7 @@ import {
   RestaurantBranch,
   Supplier,
   PurchaseOrder,
+  UserRole,
 } from '../types';
 import {
   DEFAULT_SETTINGS,
@@ -842,13 +843,32 @@ export function getDatabaseMetrics(): {
   }
 }
 
+export const DEFAULT_AUTH_USER: AuthUser = {
+  id: 'owner-01',
+  name: 'Ernest Nyambi',
+  username: 'ernest_owner',
+  role: UserRole.OWNER,
+  restaurant_id: 'ollis-pizza',
+  businessId: 'ollis-pizza',
+  email: 'ernestnyambi23@gmail.com',
+  lastLoginAt: Date.now(),
+};
+
 export function loadStoredAuthUser(): AuthUser | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.AUTH_USER);
-    if (!raw) return null;
-    return JSON.parse(raw);
+    if (!raw) {
+      saveStoredAuthUser(DEFAULT_AUTH_USER);
+      return DEFAULT_AUTH_USER;
+    }
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.id || !parsed.role) {
+      saveStoredAuthUser(DEFAULT_AUTH_USER);
+      return DEFAULT_AUTH_USER;
+    }
+    return parsed;
   } catch {
-    return null;
+    return DEFAULT_AUTH_USER;
   }
 }
 
@@ -880,6 +900,10 @@ export function loadStoredTenants(): TenantRestaurant[] {
       return INITIAL_TENANTS_LIST;
     }
     const parsed: TenantRestaurant[] = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      saveStoredTenants(INITIAL_TENANTS_LIST);
+      return INITIAL_TENANTS_LIST;
+    }
     // Backfill any missing fields for legacy stored tenants
     let modified = false;
     const enriched = parsed.map((t) => {

@@ -1,12 +1,8 @@
-import { pgTable, serial, text, integer, boolean, timestamp, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, integer, boolean, timestamp, index } from 'drizzle-orm/pg-core';
 
 // Authoritative tenant registry. Tenant membership/role is enforced server-side.
 export const restaurants = pgTable('restaurants', {
   id: text('id').primaryKey(),
-  restaurantId: text('restaurant_id').notNull().references(() => restaurants.id),
-  restaurantId: text('restaurant_id').notNull().references(() => restaurants.id),
-  restaurantId: text('restaurant_id').notNull().references(() => restaurants.id),
-  restaurantId: text('restaurant_id').notNull().references(() => restaurants.id),
   name: text('name').notNull(),
   status: text('status').notNull().default('active'),
   createdAt: timestamp('created_at').defaultNow(),
@@ -15,18 +11,18 @@ export const restaurants = pgTable('restaurants', {
 // Users table (Firebase Auth mapping)
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
-  restaurantId: text('restaurant_id').notNull().references(() => restaurants.id),
   uid: text('uid').notNull().unique(), // Firebase Auth UID
   email: text('email').notNull(),
   name: text('name'),
   role: text('role').notNull().default('staff'),
   restaurantId: text('restaurant_id').references(() => restaurants.id),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [uniqueIndex('purchases_restaurant_id_id_uidx').on(table.restaurantId, table.id), index('purchases_restaurant_id_idx').on(table.restaurantId)]);
+}, (table) => [index('users_restaurant_id_idx').on(table.restaurantId)]);
 
 // Restaurant configuration table
 export const settings = pgTable('settings', {
   id: serial('id').primaryKey(),
+  restaurantId: text('restaurant_id').references(() => restaurants.id),
   restaurantName: text('restaurant_name').notNull(),
   tagline: text('tagline'),
   currency: text('currency').default('KES'),
@@ -37,11 +33,12 @@ export const settings = pgTable('settings', {
   defaultPrepMinutes: integer('default_prep_minutes').default(20),
   overdueThresholdMinutes: integer('overdue_threshold_minutes').default(30),
   updatedAt: timestamp('updated_at').defaultNow(),
-}, (table) => [uniqueIndex('settings_restaurant_id_uidx').on(table.restaurantId)]);
+}, (table) => [index('settings_restaurant_id_idx').on(table.restaurantId)]);
 
 // Menu items
 export const menuItems = pgTable('menu_items', {
   id: text('id').primaryKey(),
+  restaurantId: text('restaurant_id').references(() => restaurants.id),
   name: text('name').notNull(),
   category: text('category').notNull(),
   stock: integer('stock').default(0).notNull(),
@@ -53,11 +50,12 @@ export const menuItems = pgTable('menu_items', {
   isChefSpecial: boolean('is_chef_special').default(false),
   isSaturdaySpecial: boolean('is_saturday_special').default(false),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [uniqueIndex('menu_items_restaurant_id_id_uidx').on(table.restaurantId, table.id), index('menu_items_restaurant_id_idx').on(table.restaurantId)]);
+}, (table) => [index('menu_items_restaurant_id_idx').on(table.restaurantId)]);
 
 // Orders
 export const orders = pgTable('orders', {
   id: text('id').primaryKey(),
+  restaurantId: text('restaurant_id').references(() => restaurants.id),
   orderNumber: text('order_number').notNull(),
   customerName: text('customer_name').notNull(),
   phone: text('phone'),
@@ -77,11 +75,12 @@ export const orders = pgTable('orders', {
   source: text('source'),
   estimatedPrepMinutes: integer('estimated_prep_minutes').default(20),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [uniqueIndex('orders_restaurant_id_id_uidx').on(table.restaurantId, table.id), index('orders_restaurant_id_idx').on(table.restaurantId)]);
+}, (table) => [index('orders_restaurant_id_idx').on(table.restaurantId)]);
 
 // Staff
 export const staffMembers = pgTable('staff_members', {
   id: text('id').primaryKey(),
+  restaurantId: text('restaurant_id').references(() => restaurants.id),
   name: text('name').notNull(),
   username: text('username'),
   roleTitle: text('role_title').notNull(),
@@ -93,11 +92,12 @@ export const staffMembers = pgTable('staff_members', {
   employmentDate: text('employment_date'),
   salaryPaymentStatus: text('salary_payment_status').default('unpaid'),
   createdAt: timestamp('created_at').defaultNow(),
-}, (table) => [uniqueIndex('staff_restaurant_id_id_uidx').on(table.restaurantId, table.id), index('staff_restaurant_id_idx').on(table.restaurantId)]);
+}, (table) => [index('staff_restaurant_id_idx').on(table.restaurantId)]);
 
 // Purchases / Procurement
 export const purchases = pgTable('purchases', {
   id: text('id').primaryKey(),
+  restaurantId: text('restaurant_id').references(() => restaurants.id),
   itemName: text('item_name').notNull(),
   quantity: integer('quantity').notNull(),
   pricePerUnit: integer('price_per_unit').notNull(),
@@ -105,4 +105,4 @@ export const purchases = pgTable('purchases', {
   purchaseDate: text('purchase_date'),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => [index('purchases_restaurant_id_idx').on(table.restaurantId)]);
